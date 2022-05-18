@@ -1,0 +1,645 @@
+openapi: 3.0.0
+info:
+  title: Altevent API
+  description: Altevent API -  Dokumentasi API dari aplikasi Event Planning 
+  version: 1.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/adeeplearn/Altevent/1.0.0
+  - description: Development phase server
+    url: https://localhost:8001/api
+tags:
+  - name: Auth
+    description: API Endpoint for Authentication
+  - name: Users
+    description: API Endpoint for manage Users
+  - name: Events
+    description: API Endpoint for manage Event
+paths:
+  /login:
+    post:
+      tags:
+        - "Auth"
+      summary: user login with credentials
+      description: Untuk login Ke dalam Sistem dengan credentials yang dimiliki
+      requestBody:
+        $ref: '#/components/requestBodies/LoginBody'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Success Login"
+                  data:
+                    $ref: "#/components/schemas/SimpleUserSchema"
+                  token:
+                    type: string
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+# User Register
+  /register:
+    post:
+      tags:
+        - "Auth"
+      summary: Register new user
+      description: Create new user
+      requestBody:
+        $ref: '#/components/requestBodies/UsersBody'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: "Success register user"
+                  data:
+                    $ref: "#/components/schemas/UserResponse"
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        500:
+          $ref: "#/components/responses/500InternalServerError"
+
+
+  #-------------------------------
+  # Users Section
+  #-------------------------------
+  # GetById User
+  /users/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: the user ID
+    get:
+      tags:
+        - "Users"
+      description: Mengambil data user berdasarkan ID yang ada
+      summary: Get a user by ID
+      responses:
+        200:
+          description: OK
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: users exist
+                  data:
+                    $ref: "#/components/schemas/SimpleUserSchema"
+                  status:
+                    type: boolean
+                    example: true
+        404:
+          $ref: "#/components/responses/404NotFound"
+    # Update User
+    put:
+      tags:
+        - "Users"
+      security:
+        - bearerAuth: []
+      description: Mengubah Data User berdasarkan id yang ada
+      summary: Ubah data user berdasarkan id
+      requestBody:
+        $ref : "#/components/requestBodies/UsersBody"
+      responses:
+        200:
+          description: OK
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: data berhasil diupdate
+                  data:
+                    $ref: "#/components/schemas/UserSchema"
+                  status:
+                    type: boolean
+                    example: true
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        404:
+          $ref: "#/components/responses/404NotFound"
+    # Delete user
+    delete:
+      tags:
+        - "Users"
+      security:
+        - bearerAuth: []
+      description: Menghapus Data User yang sudah tidak digunakan
+      summary: Hapus data user berdasarkan user id
+      responses:
+        200:
+          description: "Success Request"
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: data berhasil dihapus
+                  data:
+                    type: object
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+
+  #-------------------------------
+  # Event Section
+  #-------------------------------
+  /events:
+    get:
+      tags:
+        - "Events"
+      security:
+        - bearerAuth: []
+      description: Menampilkan semua events
+      summary: get all events
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Success get all events"
+                  data:
+                    $ref: "#/components/schemas/ListEventSchema"
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        500:
+          $ref: "#/components/responses/500InternalServerError"
+    post:
+      tags:
+        - "Events"
+      security:
+        - bearerAuth: []
+      description: Membuat data event baru
+      summary: Create a new event
+      requestBody:
+        $ref : "#/components/requestBodies/InsertEvent"
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: "Success created new event"
+                  data:
+                    $ref: "#/components/schemas/EventFullResponse"
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        500:
+          $ref: "#/components/responses/500InternalServerError"
+  /events/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: the event id
+    get:
+      tags:
+        - "Events"
+      security:
+        - bearerAuth: []
+      description: Menampilkan data event berdasarkan parameter id
+      summary: get event by id
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Success found event data"
+                  data:
+                    $ref: "#/components/schemas/EventFullResponse"
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        500:
+          $ref: "#/components/responses/500InternalServerError"  
+    put:
+      tags:
+        - "Events"
+      security:
+        - bearerAuth: []
+      description: Mengubah Data Event berdasarkan id yang ada
+      summary: Ubah data task berdasarkan id
+      requestBody:
+        $ref : "#/components/requestBodies/InsertEvent"
+      responses:
+        200:
+          description: OK
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Success update event data
+                  data:
+                    $ref: "#/components/schemas/EventFullResponse"
+                  status:
+                    type: boolean
+                    example: true
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        404:
+          $ref: "#/components/responses/404NotFound"
+    # Delete user
+    delete:
+      tags:
+        - "Events"
+      security:
+        - bearerAuth: []
+      description: Menghapus Event yang sudah berlalu
+      summary: Hapus data event berdasarkan id event
+      responses:
+        200:
+          description: OK
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Success delete event data
+                  data:
+                    type: object
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+components:
+  #-------------------------------
+  # Reusable security schemes
+  #-------------------------------
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  #-------------------------------
+  # Reusable schemas (data models)
+  #-------------------------------
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: gadipuranto@gmail.com
+        password:
+          type: string
+          example: admin1234
+    SimpleUserSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Galang Adi Puranto
+        email:
+          type: string
+          example: gadipuranto@gmail.com
+        hp:
+          type: string
+          example: "08986817477"
+    UserSchema:
+      type: object
+      required:
+          - name
+          - email
+          - password
+      properties:
+          username:
+            type: string
+            example: gadipuranto
+          fullname:
+            type: string
+            example: Galang Adi Puranto
+          dob:
+            type: string
+            example: "1999-10-13"
+          address:
+            type: string
+            example: "Sleman"
+          email:
+            type: string
+            example: gal@test.com
+          phone:
+            type: string
+            example: "08986817477"
+          password:
+            type: string
+            example: admin1234
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Galang Adi Puranto
+        email:
+           type: string
+           example: gal@test.com
+        phone:
+          type: string
+          example: "08986817477"
+    
+    EventSchema:
+      type: object
+      required:
+          - title
+          - description
+          - banner
+      properties:
+          title:
+            type: string
+            example: Life After Backend Bootcamp
+          description:
+            type: string
+            example: Menyempatkan waktu belajar bahasa pemrogramman Golang
+          rules:
+            type: string
+            example: some terms and condition about event
+          banner:
+            type: string
+            example: link alamat images/banner event
+          duedate:
+            type: number
+            example: 1652691775487
+          time:
+            type: number
+            example: 1652691775487
+          location:
+            type: string
+            example: Online
+          organizer:
+            type: string
+            example: Alterra Academy
+          ticket:
+            type: integer
+            example: 99
+          links:
+            type: string
+            example: zoom.us/x/1234567
+    EventFullResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+            type: string
+            example: Life After Backend Bootcamp
+        description:
+          type: string
+          example: Menyempatkan waktu belajar bahasa pemrogramman Golang
+        rules:
+          type: string
+          example: some terms and condition about event
+        banner:
+          type: string
+          example: link alamat images/banner event
+        duedate:
+          type: number
+          example: 1652691775487
+        time:
+          type: number
+          example: 1652691775487
+        location:
+          type: string
+          example: Online
+        organizer:
+          type: string
+          example: Alterra Academy
+        ticket:
+          type: integer
+          example: 99
+        links:
+          type: string
+          example: zoom.us/x/1234567
+        user_id:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          example: "2022-05-13 07:15:51.093"
+        updated_at:
+          type: string
+        deleted_at:
+          type: string
+    ListEventSchema:
+      type: array
+      items:
+        $ref: '#/components/schemas/EventFullResponse'
+    
+#-------------------------------
+# Reusable request bodies
+#-------------------------------
+  requestBodies:
+    LoginBody:
+      description: A JSON object containing login information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+    UsersBody:
+      description: A JSON object containing users information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSchema'
+    InsertEvent:
+      description: A JSON object containing tasks information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EventSchema'
+#-------------------------------
+# Reusable responses
+#-------------------------------
+  responses:
+    400BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message: 
+                type: string
+              data:
+                type: object
+              status:
+                type: boolean
+          example:
+            code: 400
+            message: Bad Request
+            data: 
+            status: false
+    401UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message: 
+                type: string
+              data:
+                type: object
+              status:
+                type: boolean
+          example:
+            code: 401
+            message: Access token is missing or invalid
+            data:
+            status: false
+    404NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message: 
+                type: string
+              data:
+                type: object
+              status:
+                type: boolean
+          example:
+            code: 404
+            message: Not Found
+            data:
+            status: false
+    500InternalServerError:
+      description: "Error from server"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message: 
+                type: string
+              data:
+                type: object
+              status:
+                type: boolean
+          example:
+            code: 500
+            message: There is some problem on server
+            data: 
+            status: false
