@@ -3,6 +3,9 @@ info:
   title: Altevent API
   description: Altevent API -  Dokumentasi API dari aplikasi Event Planning 
   version: 1.0.0
+  contact:
+    name: Galang Adi Puranto
+    email: gadipuranto@gmail.com
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
@@ -17,6 +20,9 @@ tags:
   - name: Events
     description: API Endpoint for manage Event
 paths:
+  #-------------------------------
+  # Auth Section
+  #-------------------------------
   /login:
     post:
       tags:
@@ -83,11 +89,9 @@ paths:
         500:
           $ref: "#/components/responses/500InternalServerError"
 
-
   #-------------------------------
   # Users Section
   #-------------------------------
-  # GetById User
   /users/{id}:
     parameters:
       - in: path
@@ -393,7 +397,10 @@ components:
         id:
           type: integer
           example: 1
-        name:
+        username:
+          type: string
+          example: gadipuranto
+        fullname:
           type: string
           example: Galang Adi Puranto
         email:
