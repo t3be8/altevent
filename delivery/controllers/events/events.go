@@ -130,97 +130,97 @@ func (ec *EventController) SelectEvent() echo.HandlerFunc {
 
 }
 
-// func (ec *EventController) UpdateEvent() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		var tmpUpdate req.UpdateEventRequest
+func (ec *EventController) UpdateEvent() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var tmpUpdate req.UpdateEventRequest
 
-// 		if err := c.Bind(&tmpUpdate); err != nil {
-// 			return c.JSON(http.StatusUnsupportedMediaType, view.StatusBindData())
-// 		}
+		if err := c.Bind(&tmpUpdate); err != nil {
+			return c.JSON(http.StatusUnsupportedMediaType, view.StatusBindData())
+		}
 
-// 		if err := ec.Valid.Struct(tmpUpdate); err != nil {
-// 			log.Warn(err.Error())
-// 			return c.JSON(http.StatusNotAcceptable, view.StatusValidate())
-// 		}
+		if err := ec.Valid.Struct(tmpUpdate); err != nil {
+			log.Warn(err.Error())
+			return c.JSON(http.StatusNotAcceptable, view.StatusValidate())
+		}
 
-// 		id, err := strconv.Atoi(c.Param("id"))
-// 		if err != nil {
-// 			log.Warn(err)
-// 			return c.JSON(http.StatusNotAcceptable, view.StatusIdConversion())
-// 		}
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusNotAcceptable, view.StatusIdConversion())
+		}
 
-// 		UserID := middlewares.ExtractTokenUserId(c)
-// 		if UserID != float64(id) {
-// 			return c.JSON(http.StatusNotFound, view.StatusNotFound("token tidak ditemukan"))
-// 		}
+		UserID := middlewares.ExtractTokenUserId(c)
+		if UserID != float64(id) {
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("token tidak ditemukan"))
+		}
 
-// 		updateEvent := entity.Event{
-// 			Title:       tmpUpdate.Title,
-// 			Description: tmpUpdate.Description,
-// 			Rules:       tmpUpdate.Rules,
-// 			Organizer:   tmpUpdate.Organizer,
-// 			DueDate:     tmpUpdate.DueDate,
-// 			BeginAt:     tmpUpdate.BeginAt,
-// 			Location:    tmpUpdate.Location,
-// 			Ticket:      tmpUpdate.Ticket,
-// 			Links:       tmpUpdate.Links,
-// 			Banner:      tmpUpdate.Banner,
-// 		}
+		updateEvent := entity.Event{
+			Title:       tmpUpdate.Title,
+			Description: tmpUpdate.Description,
+			Rules:       tmpUpdate.Rules,
+			Organizer:   tmpUpdate.Organizer,
+			DueDate:     tmpUpdate.DueDate,
+			BeginAt:     tmpUpdate.BeginAt,
+			Location:    tmpUpdate.Location,
+			Ticket:      tmpUpdate.Ticket,
+			Links:       tmpUpdate.Links,
+			Banner:      tmpUpdate.Banner,
+		}
 
-// 		event, err := ec.Repo.UpdateEvent(uint(id), updateEvent)
+		event, err := ec.Repo.UpdateEvent(uint(id), updateEvent)
 
-// 		if err != nil {
-// 			log.Warn(err)
-// 			notFound := "data tidak ditemukan"
-// 			if err.Error() == notFound {
-// 				return c.JSON(http.StatusNotFound, view.StatusNotFound(notFound))
-// 			}
-// 			return c.JSON(http.StatusInternalServerError, view.InternalServerError())
+		if err != nil {
+			log.Warn(err)
+			notFound := "data tidak ditemukan"
+			if err.Error() == notFound {
+				return c.JSON(http.StatusNotFound, view.StatusNotFound(notFound))
+			}
+			return c.JSON(http.StatusInternalServerError, view.InternalServerError())
 
-// 		}
-// 		response := res.EventResponse{
-// 			ID:          event.ID,
-// 			Title:       event.Title,
-// 			Description: event.Description,
-// 			Rules:       event.Rules,
-// 			Organizer:   event.Organizer,
-// 			Location:    event.Location,
-// 			Ticket:      event.Ticket,
-// 			Links:       event.Links,
-// 		}
-// 		return c.JSON(http.StatusOK, view.StatusUpdate(response))
-// 	}
+		}
+		response := res.EventResponse{
+			ID:          event.ID,
+			Title:       event.Title,
+			Description: event.Description,
+			Rules:       event.Rules,
+			Organizer:   event.Organizer,
+			Location:    event.Location,
+			Ticket:      event.Ticket,
+			Links:       event.Links,
+		}
+		return c.JSON(http.StatusOK, view.StatusUpdate(response))
+	}
 
-// }
+}
 
-// func (ec *EventController) Delete() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		id := c.Param("id")
+func (ec *EventController) Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.Param("id")
 
-// 		convID, err := strconv.Atoi(id)
+		convID, err := strconv.Atoi(id)
 
-// 		if err != nil {
-// 			log.Warn(err)
-// 			return c.JSON(http.StatusNotAcceptable, view.StatusIdConversion())
-// 		}
+		if err != nil {
+			log.Warn(err)
+			return c.JSON(http.StatusNotAcceptable, view.StatusIdConversion())
+		}
 
-// 		UserID := middlewares.ExtractTokenUserId(c)
+		UserID := middlewares.ExtractTokenUserId(c)
 
-// 		if UserID != float64(convID) {
-// 			return c.JSON(http.StatusNotFound, view.StatusNotFound("data tidak ditemukan"))
-// 		}
+		if UserID != float64(convID) {
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("data tidak ditemukan"))
+		}
 
-// 		found, err := ec.Repo.GetEventID(uint(UserID))
-// 		if err != nil {
-// 			return c.JSON(http.StatusNotFound, view.StatusNotFound("data tidak ditemukan"))
-// 		}
+		found, err := ec.Repo.GetEventID(uint(UserID))
+		if err != nil {
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("data tidak ditemukan"))
+		}
 
-// 		_, error := ec.Repo.DeleteEvent(found.ID)
+		_, error := ec.Repo.DeleteEvent(found.ID)
 
-// 		if error != nil {
-// 			return c.JSON(http.StatusInternalServerError, view.InternalServerError())
-// 		}
+		if error != nil {
+			return c.JSON(http.StatusInternalServerError, view.InternalServerError())
+		}
 
-// 		return c.JSON(http.StatusOK, view.StatusDelete())
-// 	}
-// }
+		return c.JSON(http.StatusOK, view.StatusDelete())
+	}
+}
