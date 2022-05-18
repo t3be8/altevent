@@ -1,16 +1,17 @@
-FROM golang:1.18
+FROM golang:1.18-alpine
 
-##buat folder APP
+RUN apk add git
+#create app folder
 RUN mkdir /app
 
-##set direktori utama
+#set work dir
 WORKDIR /app
 
-##copy seluruh file ke app
+#copy all to app folder
 ADD . /app
 
-##buat executeable
+#create exe file
 RUN go build -o main .
 
-##jalankan executeable
+#run exe file
 CMD ["/app/main"]
