@@ -88,14 +88,14 @@ func (ec *EventController) GetEventById() echo.HandlerFunc {
 		}
 		UserID := middlewares.ExtractTokenUserId(c)
 		if UserID != float64(convID) {
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data user tidak ditemukan"))
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
 		}
 
 		event, err := ec.Repo.GetEventID(uint(convID))
 
 		if err != nil {
 			log.Warn()
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data user tidak ditemukan"))
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
 		}
 		response := res.EventResponse{
 			ID:          event.ID,

@@ -10,7 +10,7 @@ type RegisterRequest struct {
 	Username string `json:"username" validate:"required"`
 	Email    string `json:"email" validate:"required"`
 	Phone    string `json:"phone"`
-	Password string `json:"password"`
+	Password string `json:"password" validate:"required"`
 }
 
 type UpdateUserReq struct {

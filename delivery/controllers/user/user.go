@@ -91,7 +91,7 @@ func (uc *UserController) Login() echo.HandlerFunc {
 		match, err := uc.Repo.IsLogin(param.Email, param.Password)
 
 		if err != nil {
-			return c.JSON(http.StatusUnauthorized, view.StatusUnauthorized(err))
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found, gagal login!"))
 		}
 
 		resp = res.UserResponse{
@@ -267,15 +267,10 @@ func (uc *UserController) Delete() echo.HandlerFunc {
 		UserID := middlewares.ExtractTokenUserId(c)
 
 		if UserID != float64(convID) {
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data tidak ditemukan"))
+			return c.JSON(http.StatusUnauthorized, view.StatusUnauthorized())
 		}
 
-		found, err := uc.Repo.GetUserID(uint(UserID))
-		if err != nil {
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data tidak ditemukan"))
-		}
-
-		_, error := uc.Repo.DeleteUser(found.ID)
+		_, error := uc.Repo.DeleteUser(uint(convID))
 
 		if error != nil {
 			return c.JSON(http.StatusInternalServerError, view.InternalServerError())
