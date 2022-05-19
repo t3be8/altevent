@@ -6,14 +6,15 @@ type LoginRequest struct {
 }
 
 type RegisterRequest struct {
-	Name     string `json:"name" validate:"required"`
+	Fullname string `json"fullname"`
+	Username string `json:"username" validate:"required"`
 	Email    string `json:"email" validate:"required"`
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
 }
 
 type UpdateUserReq struct {
-	Name     string `json:"name" validate:"required"`
+	Fullname string `json:"fullname" validate:"required"`
 	Email    string `json:"email"`
 	Phone    string `json:"hp"`
 	Password string `json:"password"`

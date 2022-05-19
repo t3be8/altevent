@@ -18,6 +18,11 @@ func RegisterPath(e *echo.Echo, uc user.IUserController) {
 	apiGroup.POST("/login", uc.Login())
 	apiGroup.POST("/register", uc.Register())
 
+	// Users route
+	apiGroup.GET("/users/:id", uc.Show(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
+	apiGroup.PUT("/users/:id", uc.Update(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
+	apiGroup.PUT("/users/:id", uc.Delete(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
+
 	// Order ticket route
 	// apiGroup.POST("/orders", oc.CreateOrder(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("RU$SI4")}))
 	// apiGroup.POST("/orders/{order_id}/cancel", oc.CancelOrder(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("RU$SI4")}))

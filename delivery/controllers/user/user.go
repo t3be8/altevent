@@ -47,7 +47,8 @@ func (uc *UserController) Register() echo.HandlerFunc {
 		hash, _ := utils.HashPassword(pwd)
 
 		newUser := entity.User{
-			FullName: tmpUser.Name,
+			FullName: tmpUser.Fullname,
+			Username: tmpUser.Username,
 			Email:    tmpUser.Email,
 			Phone:    tmpUser.Phone,
 			Password: hash,

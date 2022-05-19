@@ -727,6 +727,30 @@ components:
         hp:
           type: string
           example: "08986817477"
+    RegisterRequest:
+      type: object
+      required:
+          - fullname
+          - username
+          - email
+          - phone
+          - password
+      properties:
+          username:
+            type: string
+            example: gadipuranto
+          fullname:
+            type: string
+            example: Galang Adi Puranto
+          email:
+            type: string
+            example: gal@test.com
+          phone:
+            type: string
+            example: "08986817477"
+          password:
+            type: string
+            example: admin1234
     UserSchema:
       type: object
       required:
@@ -940,7 +964,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UserSchema'
+            $ref: '#/components/schemas/RegisterRequest'
     InsertEvent:
       description: A JSON object containing events information
       required: true
