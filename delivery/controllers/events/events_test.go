@@ -102,7 +102,7 @@ func TestSelectEvent(t *testing.T) {
 		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
 		assert.Equal(t, resp[0].Title, "Nobar EUFA Champions")
 	})
-	t.Run("Error select product", func(t *testing.T) {
+	t.Run("Error select events", func(t *testing.T) {
 		e := echo.New()
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		res := httptest.NewRecorder()
@@ -203,6 +203,30 @@ func TestDeleteEvent(t *testing.T) {
 		assert.True(t, result.Status)
 		assert.Nil(t, result.Data)
 	})
+
+	t.Run("Error data not found", func(t *testing.T) {
+		e := echo.New()
+		request := httptest.NewRequest(http.MethodGet, "/", nil)
+		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		request.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		response := httptest.NewRecorder()
+
+		ctx := e.NewContext(request, response)
+		ctx.SetPath("/events/:id")
+		ctx.SetParamNames("id")
+		ctx.SetParamValues("99")
+
+		event := New(&errorMockEventRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")})(event.DeleteEvent())(ctx)
+
+		var resp Response
+		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
+		assert.Equal(t, 404, resp.Code)
+		assert.Equal(t, "Data not found", resp.Message)
+		assert.False(t, resp.Status)
+		assert.Nil(t, resp.Data)
+
+	})
 }
 
 func TestUpdateEvent(t *testing.T) {
@@ -230,6 +254,30 @@ func TestUpdateEvent(t *testing.T) {
 		assert.Equal(t, "Updated", result.Message)
 		assert.True(t, result.Status)
 		assert.NotNil(t, result.Data)
+	})
+
+	t.Run("Error data not found", func(t *testing.T) {
+		e := echo.New()
+		request := httptest.NewRequest(http.MethodGet, "/", nil)
+		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		request.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		response := httptest.NewRecorder()
+
+		ctx := e.NewContext(request, response)
+		ctx.SetPath("/events/:id")
+		ctx.SetParamNames("id")
+		ctx.SetParamValues("99")
+
+		event := New(&errorMockEventRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")})(event.UpdateEvent())(ctx)
+
+		var resp Response
+		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
+		assert.Equal(t, 404, resp.Code)
+		assert.Equal(t, "Data not found", resp.Message)
+		assert.False(t, resp.Status)
+		assert.Nil(t, resp.Data)
+
 	})
 }
 
