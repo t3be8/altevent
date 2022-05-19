@@ -241,7 +241,7 @@ func TestUpdateEvent(t *testing.T) {
 		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
 		res := httptest.NewRecorder()
 		context := e.NewContext(req, res)
-		context.SetPath("/event/:id")
+		context.SetPath("/events/:id")
 		context.SetParamNames("id")
 		context.SetParamValues("99")
 		eventController := New(&mockEventRepo{}, validator.New())
