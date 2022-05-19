@@ -180,6 +180,10 @@ func (mur *mockUserRepo) DeleteUser(id uint) (entity.User, error) {
 	return entity.User{Username: "username", Email: "user99@test.com"}, nil
 }
 
+func (mur *mockUserRepo) GetMyEvent(id uint) ([]entity.Event, error) {
+	return []entity.Event{{Title: "Nobar Final Champions League", Ticket: 125}}, nil
+}
+
 type errorMockUserRepo struct{}
 
 func (emur *errorMockUserRepo) Register(newUser entity.User) (entity.User, error) {
@@ -200,4 +204,7 @@ func (emur *errorMockUserRepo) UpdateUser(id uint, update entity.User) (entity.U
 func (emur *errorMockUserRepo) DeleteUser(id uint) (entity.User, error) {
 	return entity.User{}, errors.New("error while accessing data")
 
+}
+func (emur *errorMockUserRepo) GetMyEvent(id uint) ([]entity.Event, error) {
+	return []entity.Event{}, errors.New("error while accessing data")
 }

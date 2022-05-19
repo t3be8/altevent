@@ -23,6 +23,7 @@ func RegisterPath(e *echo.Echo, uc user.IUserController, ec event.IEventControll
 	apiGroup.GET("/users/:id", uc.Show(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
 	apiGroup.PUT("/users/:id", uc.Update(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
 	apiGroup.DELETE("/users/:id", uc.Delete(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
+	apiGroup.GET("/users/:id/events", uc.ShowMyEvent(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
 
 	// Events route
 	apiGroup.POST("/events", ec.InsertEvent())
