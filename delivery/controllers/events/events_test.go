@@ -180,6 +180,59 @@ func TestInsertEvent(t *testing.T) {
 	})
 }
 
+func TestDeleteEvent(t *testing.T) {
+	t.Run("Success Delete Data", func(t *testing.T) {
+		e := echo.New()
+
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/events/:id")
+		context.SetParamNames("id")
+		context.SetParamValues("99")
+		eventController := New(&mockEventRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")})(eventController.DeleteEvent())(context)
+
+		var result Response
+		json.Unmarshal([]byte(res.Body.Bytes()), &result)
+
+		assert.Equal(t, 200, result.Code)
+		assert.Equal(t, "", result.Message)
+		assert.True(t, result.Status)
+		assert.Nil(t, result.Data)
+	})
+}
+
+func TestUpdateEvent(t *testing.T) {
+	t.Run("Success Update Data", func(t *testing.T) {
+		e := echo.New()
+		requestBody, _ := json.Marshal(map[string]interface{}{
+			"title":       "Nobar EUFA Champions",
+			"description": "Nobar finaa liga champions",
+		})
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(requestBody)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/event/:id")
+		context.SetParamNames("id")
+		context.SetParamValues("99")
+		eventController := New(&mockEventRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")})(eventController.UpdateEvent())(context)
+
+		var result Response
+		json.Unmarshal([]byte(res.Body.Bytes()), &result)
+
+		assert.Equal(t, 200, result.Code)
+		assert.Equal(t, "Updated", result.Message)
+		assert.True(t, result.Status)
+		assert.NotNil(t, result.Data)
+	})
+}
+
 type Response struct {
 	Code    int
 	Message string
@@ -202,10 +255,10 @@ func (mer *mockEventRepo) GetEventID(id uint) (entity.Event, error) {
 }
 
 func (mer *mockEventRepo) UpdateEvent(id uint, update entity.Event) (entity.Event, error) {
-	return entity.Event{Title: "Uefa champions", Description: "final"}, nil
+	return entity.Event{Title: "Nobar EUFA Champions", Description: "Nobar finaa liga champions"}, nil
 }
 func (mer *mockEventRepo) DeleteEvent(id uint) (entity.Event, error) {
-	return entity.Event{Title: "Uefa champions", Description: "final"}, nil
+	return entity.Event{Title: "Nobar EUFA Champions", Description: "Nobar finaa liga champions"}, nil
 }
 
 type errorMockEventRepo struct{}
