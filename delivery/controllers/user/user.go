@@ -47,7 +47,8 @@ func (uc *UserController) Register() echo.HandlerFunc {
 		hash, _ := utils.HashPassword(pwd)
 
 		newUser := entity.User{
-			FullName: tmpUser.Name,
+			FullName: tmpUser.Fullname,
+			Username: tmpUser.Username,
 			Email:    tmpUser.Email,
 			Phone:    tmpUser.Phone,
 			Password: hash,
@@ -128,14 +129,14 @@ func (uc *UserController) Show() echo.HandlerFunc {
 		}
 		UserID := middlewares.ExtractTokenUserId(c)
 		if UserID != float64(convID) {
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data user tidak ditemukan"))
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
 		}
 
 		user, err := uc.Repo.GetUserID(uint(convID))
 
 		if err != nil {
 			log.Warn()
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data user tidak ditemukan"))
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
 		}
 		response := res.UserResponse{
 			ID:       user.ID,
