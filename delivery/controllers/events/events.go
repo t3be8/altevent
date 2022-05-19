@@ -193,7 +193,7 @@ func (ec *EventController) UpdateEvent() echo.HandlerFunc {
 
 }
 
-func (ec *EventController) Delete() echo.HandlerFunc {
+func (ec *EventController) DeletedEvent() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id := c.Param("id")
 
