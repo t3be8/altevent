@@ -155,8 +155,10 @@ func TestInsertEvent(t *testing.T) {
 		var resp Response
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
-		assert.Equal(t, "Nobar final liga champions", resp.Data.(map[string]interface{})["description"])
-		//assert.True(t, resp.Status)
+		assert.Equal(t, 201, resp.Code)
+		assert.True(t, resp.Status)
+		assert.NotNil(t, resp.Data)
+		assert.Equal(t, "berhasil membuat event baru", resp.Message)
 	})
 	t.Run("Error at validate title", func(t *testing.T) {
 		e := echo.New()
@@ -281,6 +283,31 @@ func TestUpdateEvent(t *testing.T) {
 	})
 }
 
+func TestSearchEventContains(t *testing.T) {
+	t.Run("Success Search by title", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		res := httptest.NewRecorder()
+
+		context := e.NewContext(req, res)
+		context.SetPath("/events?title=:title")
+		context.SetParamNames("title")
+		context.SetParamValues("Champions")
+
+		eventController := New(&mockEventRepo{}, validator.New())
+		eventController.SearchEventContains()(context)
+
+		var resp Response
+		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
+		assert.Equal(t, 200, resp.Code)
+		assert.Equal(t, "Success Get Data", resp.Message)
+		assert.True(t, resp.Status)
+		assert.NotNil(t, resp.Data)
+
+	})
+}
+
 type Response struct {
 	Code    int
 	Message string
@@ -309,6 +336,10 @@ func (mer *mockEventRepo) DeleteEvent(id uint) (entity.Event, error) {
 	return entity.Event{Title: "Nobar EUFA Champions", Description: "Nobar finaa liga champions"}, nil
 }
 
+func (mer *mockEventRepo) SearchEventByTitle(title string) ([]entity.Event, error) {
+	return []entity.Event{{Title: "Nobar EUFA Champions", Description: "Nobar finaa liga champions"}}, nil
+}
+
 type errorMockEventRepo struct{}
 
 func (emur *errorMockEventRepo) InsertEvent(newEvent entity.Event) (entity.Event, error) {
@@ -325,4 +356,8 @@ func (emur *errorMockEventRepo) UpdateEvent(id uint, update entity.Event) (entit
 }
 func (emur *errorMockEventRepo) DeleteEvent(id uint) (entity.Event, error) {
 	return entity.Event{}, errors.New("error while accessing data")
+}
+
+func (emur *errorMockEventRepo) SearchEventByTitle(title string) ([]entity.Event, error) {
+	return []entity.Event{}, errors.New("error while accessing data")
 }

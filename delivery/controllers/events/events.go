@@ -226,3 +226,34 @@ func (ec *EventController) DeleteEvent() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, view.StatusDelete())
 	}
 }
+
+func (ec *EventController) SearchEventContains() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		title := c.QueryParam("title")
+
+		result, err := ec.Repo.SearchEventByTitle(title)
+		if err != nil {
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
+		}
+
+		var arrEvent []res.EventFullResponse
+		for _, v := range result {
+			event := res.EventFullResponse{
+				ID:          v.ID,
+				Title:       v.Title,
+				Description: v.Description,
+				Rules:       v.Rules,
+				Banner:      v.Banner,
+				DueDate:     v.DueDate,
+				BeginAt:     v.BeginAt,
+				Location:    v.Location,
+				Organizer:   v.Organizer,
+				Ticket:      v.Ticket,
+				Links:       v.Links,
+				UserID:      v.UserID,
+			}
+			arrEvent = append(arrEvent, event)
+		}
+		return c.JSON(http.StatusOK, view.StatusOK("Success Get Data", arrEvent))
+	}
+}

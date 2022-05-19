@@ -86,3 +86,11 @@ func (er *EventRepo) DeleteEvent(id uint) (entity.Event, error) {
 	log.Info()
 	return res, nil
 }
+
+func (er *EventRepo) SearchEventByTitle(title string) ([]entity.Event, error) {
+	var events []entity.Event
+	if err := er.Db.Where("title LIKE ?", "%"+title+"%").Find(&events).Error; err != nil {
+		return events, err
+	}
+	return events, nil
+}
