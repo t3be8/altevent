@@ -32,6 +32,8 @@ func (ec *EventController) InsertEvent() echo.HandlerFunc {
 		var tmpEvent req.CreateEventRequest
 		var resp res.EventResponse
 
+		idUser := middlewares.ExtractTokenUserId(c)
+
 		if err := c.Bind(&tmpEvent); err != nil {
 			log.Warn("salah input")
 			return c.JSON(http.StatusBadRequest, view.StatusInvalidRequest())
@@ -53,9 +55,10 @@ func (ec *EventController) InsertEvent() echo.HandlerFunc {
 			Ticket:      tmpEvent.Ticket,
 			Links:       tmpEvent.Links,
 			Banner:      tmpEvent.Banner,
+			UserID:      uint(int(idUser)),
 		}
 
-		data, err := ec.Repo.Create(newEvent)
+		data, err := ec.Repo.InsertEvent(newEvent)
 		if err != nil {
 			log.Warn("masalah pada server")
 			return c.JSON(http.StatusInternalServerError, view.InternalServerError())
@@ -117,7 +120,7 @@ func (ec *EventController) SelectEvent() echo.HandlerFunc {
 		// id := c.Param("id")
 
 		// convID, err := strconv.Atoi(id)
-		res, err := ec.Repo.GetEvent()
+		res, err := ec.Repo.SelectEvent()
 
 		if err != nil {
 			log.Warn("masalah pada server")
@@ -159,12 +162,11 @@ func (ec *EventController) UpdateEvent() echo.HandlerFunc {
 			Description: tmpUpdate.Description,
 			Rules:       tmpUpdate.Rules,
 			Organizer:   tmpUpdate.Organizer,
-			DueDate:     tmpUpdate.DueDate,
-			BeginAt:     tmpUpdate.BeginAt,
-			Location:    tmpUpdate.Location,
-			Ticket:      tmpUpdate.Ticket,
-			Links:       tmpUpdate.Links,
-			Banner:      tmpUpdate.Banner,
+
+			Location: tmpUpdate.Location,
+			Ticket:   tmpUpdate.Ticket,
+			Links:    tmpUpdate.Links,
+			Banner:   tmpUpdate.Banner,
 		}
 
 		event, err := ec.Repo.UpdateEvent(uint(id), updateEvent)

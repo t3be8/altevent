@@ -22,6 +22,7 @@ func main() {
 	e := echo.New()
 
 	repoUser := userRepo.New(db)
+
 	repoEvents := eventRepo.New(db)
 
 	controllerUser := userController.New(repoUser, validator.New())

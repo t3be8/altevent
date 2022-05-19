@@ -24,7 +24,7 @@ func (ur *UserRepo) IsLogin(email, password string) (entity.User, error) {
 	var u entity.User
 	var pwd string
 
-	query := "SELECT id, name, email, phone, password FROM users WHERE email = ?"
+	query := "SELECT id, username, email, phone, password FROM users WHERE email = ?"
 
 	if err := ur.Db.Raw(query, email).Scan(&u).Error; err != nil {
 		log.Warn(err)
@@ -56,7 +56,7 @@ func (ur *UserRepo) GetUserID(id uint) (entity.User, error) {
 
 	if err := ur.Db.Where("id = ?", id).Find(&arrUser).Error; err != nil {
 		log.Warn(err)
-		return entity.User{}, errors.New("tidak bisa select data")
+		return entity.User{}, errors.New("data select error")
 	}
 
 	if len(arrUser) == 0 {
@@ -79,17 +79,34 @@ func (ur *UserRepo) UpdateUser(id uint, update entity.User) (entity.User, error)
 	return user, nil
 }
 
-func (pr *UserRepo) DeleteUser(id uint) (entity.User, error) {
-	var user []entity.User
-	res, err := pr.GetUserID(id)
+func (ur *UserRepo) DeleteUser(id uint) (entity.User, error) {
+	var user entity.User
+	res, err := ur.GetUserID(id)
 	if err != nil {
 		return entity.User{}, err
 	}
 
-	if err := pr.Db.Delete(&user, "id = ?", id).Error; err != nil {
+	if err := ur.Db.Delete(&user, "id = ?", id).Error; err != nil {
 		log.Warn(err)
-		return entity.User{}, errors.New("tidak bisa delete data")
+		return entity.User{}, errors.New("data select error")
 	}
 	log.Info()
 	return res, nil
+}
+
+func (ur *UserRepo) GetMyEvent(id uint) ([]entity.Event, error) {
+	var events []entity.Event
+	result := ur.Db.Where("user_id = ?", id).Find(&events)
+	if result.Error != nil {
+		log.Warn(result.Error)
+		return []entity.Event{}, errors.New("data select error")
+	}
+
+	if len(events) == 0 {
+		log.Warn("data tidak ditemukan")
+		return events, errors.New("data tidak ditemukan")
+	}
+
+	log.Info()
+	return events, nil
 }

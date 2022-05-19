@@ -29,5 +29,5 @@ func InitDB(config AppConfig) *gorm.DB {
 }
 
 func AutoMigrate(db *gorm.DB) {
-	db.AutoMigrate(&entity.User{}, &entity.Event{}, &entity.Comment{})
+	db.AutoMigrate(&entity.User{}, &entity.Event{}, &entity.Comment{}, &entity.Attendee{})
 }
