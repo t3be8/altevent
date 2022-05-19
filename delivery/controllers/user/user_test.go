@@ -51,7 +51,7 @@ func TestRegister(t *testing.T) {
 		var resp Response
 
 		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
-		assert.Equal(t, "Success Register new user", resp.Message)
+		assert.Equal(t, "berhasil register user baru", resp.Message)
 		assert.True(t, resp.Status)
 		assert.Equal(t, 201, resp.Code)
 		assert.NotNil(t, resp.Data)
@@ -124,7 +124,7 @@ func TestShow(t *testing.T) {
 		var resp Response
 		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
 		assert.Equal(t, 200, resp.Code)
-		assert.Equal(t, "Success get user data", resp.Message)
+		assert.Equal(t, "Success get data by ID", resp.Message)
 		assert.True(t, resp.Status)
 		assert.NotNil(t, resp.Data)
 	})
