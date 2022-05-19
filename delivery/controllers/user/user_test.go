@@ -207,7 +207,8 @@ func TestUpdate(t *testing.T) {
 	t.Run("Success Update Data", func(t *testing.T) {
 		e := echo.New()
 		requestBody, _ := json.Marshal(map[string]interface{}{
-			"email": "jdoes@test.com",
+			"fullname": "John Doel",
+			"email":    "jdoes@test.com",
 		})
 		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(requestBody)))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -241,7 +242,7 @@ func TestDelete(t *testing.T) {
 		context := e.NewContext(req, res)
 		context.SetPath("/user/:id")
 		context.SetParamNames("id")
-		context.SetParamValues("3")
+		context.SetParamValues("99")
 		userController := New(&mockUserRepo{}, validator.New())
 		middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")})(userController.Delete())(context)
 
@@ -251,7 +252,34 @@ func TestDelete(t *testing.T) {
 		assert.Equal(t, 200, result.Code)
 		assert.Equal(t, "Deleted", result.Message)
 		assert.True(t, result.Status)
-		assert.NotNil(t, result.Data)
+		assert.Nil(t, result.Data)
+	})
+}
+
+func TestIsLogin(t *testing.T) {
+	t.Run("Success Login", func(t *testing.T) {
+		e := echo.New()
+		requestBody, _ := json.Marshal(map[string]interface{}{
+			"email":    "jdoe@test.com",
+			"password": "admin123",
+		})
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(requestBody)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/login")
+
+		controller := New(&mockUserRepo{}, validator.New())
+		controller.Login()(context)
+
+		var response Response
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &response)
+		assert.Equal(t, 200, response.Code)
+		assert.True(t, response.Status)
+		assert.NotNil(t, response.Data)
+		// data := response.Data.(map[string]interface{})
+		// token = data["Token"].(string)
 	})
 }
 
