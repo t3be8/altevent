@@ -19,6 +19,8 @@ tags:
     description: API Endpoint for manage Users
   - name: Events
     description: API Endpoint for manage Event
+  - name: Comments
+    description: API Endpoint for Comment
 paths:
   #-------------------------------
   # Auth Section
@@ -134,7 +136,7 @@ paths:
       security:
         - bearerAuth: []
       description: Mengubah Data User berdasarkan id yang ada
-      summary: Ubah data user berdasarkan id
+      summary: Update user data by user_id
       requestBody:
         $ref : "#/components/requestBodies/UsersBody"
       responses:
@@ -150,7 +152,7 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: data berhasil diupdate
+                    example: Success update user data
                   data:
                     $ref: "#/components/schemas/UserSchema"
                   status:
@@ -167,7 +169,7 @@ paths:
       security:
         - bearerAuth: []
       description: Menghapus Data User yang sudah tidak digunakan
-      summary: Hapus data user berdasarkan user id
+      summary: Delete user data by id
       responses:
         200:
           description: "Success Request"
@@ -181,7 +183,7 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: data berhasil dihapus
+                    example: Success delete user data
                   data:
                     type: object
                   status:
@@ -191,16 +193,139 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         401:
           $ref: "#/components/responses/401UnauthorizedError"
+  /users/{id}/events:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: the user id
+    get:
+      tags:
+        - "Users"
+      security:
+        - bearerAuth: []
+      description: Select all event that created by user
+      summary: Get all my events
+      responses:
+        200:
+          description: OK
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Success get all my event data
+                  data:
+                    $ref: '#/components/schemas/ListEventSchema'
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        500:
+          $ref: "#/components/responses/500InternalServerError"
 
   #-------------------------------
   # Event Section
   #-------------------------------
-  /events:
+  /events?title:
+    parameters:
+      - name: title
+        in: query
+        schema:
+          type: string
+        description: event title
+    get:
+      tags:
+        - "Events"
+      description: Get single event by title
+      summary: Search event by title
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Success get all comments on event"
+                  data:
+                    $ref: "#/components/schemas/EventFullResponse"
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        500:
+          $ref: "#/components/responses/500InternalServerError"  
+
+  /events?byMe:
+    parameters:
+      - name: byMe
+        in: query
+        schema:
+          type: boolean
+        description: status event by user 
     get:
       tags:
         - "Events"
       security:
         - bearerAuth: []
+      description: Get list event by user with filter
+      summary: Get list events organize by user
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Success get all comments on event"
+                  data:
+                    $ref: "#/components/schemas/EventFullResponse"
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        500:
+          $ref: "#/components/responses/500InternalServerError"  
+
+  /events:
+    get:
+      parameters:
+      - name: byMe
+        in: query
+        schema:
+          type: boolean
+        description: status event by user 
+      tags:
+        - "Events"
       description: Menampilkan semua events
       summary: get all events
       responses:
@@ -271,13 +396,14 @@ paths:
           type: integer
           minimum: 1
         description: the event id
+    # Get Single event by id
     get:
       tags:
         - "Events"
       security:
         - bearerAuth: []
       description: Menampilkan data event berdasarkan parameter id
-      summary: get event by id
+      summary: get single event
       responses:
         200:
           description: OK
@@ -303,13 +429,14 @@ paths:
           $ref: "#/components/responses/401UnauthorizedError"
         500:
           $ref: "#/components/responses/500InternalServerError"  
+    # Update events
     put:
       tags:
         - "Events"
       security:
         - bearerAuth: []
       description: Mengubah Data Event berdasarkan id yang ada
-      summary: Ubah data task berdasarkan id
+      summary: Update event data by id
       requestBody:
         $ref : "#/components/requestBodies/InsertEvent"
       responses:
@@ -335,14 +462,16 @@ paths:
           $ref: "#/components/responses/401UnauthorizedError"
         404:
           $ref: "#/components/responses/404NotFound"
-    # Delete user
+        500:
+          $ref: "#/components/responses/500InternalServerError"
+    # Delete events
     delete:
       tags:
         - "Events"
       security:
         - bearerAuth: []
       description: Menghapus Event yang sudah berlalu
-      summary: Hapus data event berdasarkan id event
+      summary: Delete event data by id
       responses:
         200:
           description: OK
@@ -366,6 +495,195 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         401:
           $ref: "#/components/responses/401UnauthorizedError"
+  /events/{id}/join:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: the event id
+    post:
+      tags:
+        - "Events"
+      security:
+        - bearerAuth: []
+      description: User join to an event
+      summary: User join to event / order ticket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ticket_order:
+                  type: integer
+                  example: 1
+        
+      responses:
+        200:
+          description: OK
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Success update event data
+                  data:
+                    $ref: "#/components/schemas/JoinEventFullResponse"
+                  status:
+                    type: boolean
+                    example: true
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        404:
+          $ref: "#/components/responses/404NotFound"
+        500:
+          $ref: "#/components/responses/500InternalServerError"  
+  /events/{id}/comments:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: the event id
+    # Get all cpmment on event
+    get:
+      tags:
+        - "Comments"
+      security:
+        - bearerAuth: []
+      description: Retrieve all comment in some event
+      summary: Get all comment on event
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Success get all comments on event"
+                  data:
+                    $ref: "#/components/schemas/ListCommentSchema"
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        500:
+          $ref: "#/components/responses/500InternalServerError"  
+    post:
+      tags:
+        - "Comments"
+      security:
+        - bearerAuth: []
+      description: Post comment in some event
+      summary: Create comment on event
+      requestBody:
+        $ref: '#/components/requestBodies/PostComment'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Success post new comment"
+                  data:
+                    $ref: "#/components/schemas/CommentFullResponse"
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        500:
+          $ref: "#/components/responses/500InternalServerError"  
+  /events/{eventId}/comments/{commentId}:
+    parameters:
+      - in: path
+        name: eventId
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: the event id
+      - in: path
+        name: commentId
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: the comment id
+    put:
+      tags:
+        - "Comments"
+      security:
+        - bearerAuth: []
+      description: Post comment in some event
+      summary: Create comment on event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  example: Keduax!!
+        
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Success post new comment"
+                  data:
+                    $ref: "#/components/schemas/CommentFullResponse"
+                  status:
+                    type: boolean
+                    example: true
+        400:
+          $ref: "#/components/responses/400BadRequest"
+        401:
+          $ref: "#/components/responses/401UnauthorizedError"
+        500:
+          $ref: "#/components/responses/500InternalServerError" 
+
+  
 components:
   #-------------------------------
   # Reusable security schemes
@@ -409,6 +727,30 @@ components:
         hp:
           type: string
           example: "08986817477"
+    RegisterRequest:
+      type: object
+      required:
+          - fullname
+          - username
+          - email
+          - phone
+          - password
+      properties:
+          username:
+            type: string
+            example: gadipuranto
+          fullname:
+            type: string
+            example: Galang Adi Puranto
+          email:
+            type: string
+            example: gal@test.com
+          phone:
+            type: string
+            example: "08986817477"
+          password:
+            type: string
+            example: admin1234
     UserSchema:
       type: object
       required:
@@ -459,6 +801,9 @@ components:
           - title
           - description
           - banner
+          - due_date
+          - begin_at
+          - ticket
       properties:
           title:
             type: string
@@ -472,12 +817,12 @@ components:
           banner:
             type: string
             example: link alamat images/banner event
-          duedate:
+          due_date:
             type: number
             example: 1652691775487
-          time:
-            type: number
-            example: 1652691775487
+          begin_at:
+            type: string
+            example: "090500"
           location:
             type: string
             example: Online
@@ -512,8 +857,8 @@ components:
           type: number
           example: 1652691775487
         time:
-          type: number
-          example: 1652691775487
+          type: string
+          example: "090500"
         location:
           type: string
           example: Online
@@ -531,6 +876,7 @@ components:
           example: 1
         created_at:
           type: string
+          format: date-time
           example: "2022-05-13 07:15:51.093"
         updated_at:
           type: string
@@ -541,6 +887,66 @@ components:
       items:
         $ref: '#/components/schemas/EventFullResponse'
     
+    JoinEventFullResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        event_id:
+          type: integer
+          example: 3
+        user_id:
+          type: integer
+          example: 2
+        ticket_order:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+          example: "2022-05-13 07:15:51.093"
+        updated_at:
+          type: string
+        deleted_at:
+          type: string
+
+    CommentSchema:
+      type: object
+      required:
+        - "comment"
+      properties:
+        comment:
+          type: string
+          example: Pertamax!!
+    CommentFullResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        event_id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        comment:
+          type: string
+          example: Pertamax!!
+        created_at:
+          type: string
+          format: date-time
+          example: "2022-05-13 07:15:51.093"
+        updated_at:
+          type: string
+        deleted_at:
+          type: string
+    ListCommentSchema:
+      type: array
+      items:
+        $ref: '#/components/schemas/CommentFullResponse'
+
 #-------------------------------
 # Reusable request bodies
 #-------------------------------
@@ -558,14 +964,21 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UserSchema'
+            $ref: '#/components/schemas/RegisterRequest'
     InsertEvent:
-      description: A JSON object containing tasks information
+      description: A JSON object containing events information
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/EventSchema'
+    PostComment:
+      description: A JSON object containing comment information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommentSchema'
 #-------------------------------
 # Reusable responses
 #-------------------------------
