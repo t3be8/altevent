@@ -61,28 +61,28 @@ func (er *EventRepo) GetEventID(id uint) (entity.Event, error) {
 	return arrEvent[0], nil
 }
 
-// func (er *EventRepo) UpdateEvent(id uint, update entity.Event) (entity.Event, error) {
-// 	var event entity.Event
-// 	if err := er.Db.Where("id = ?", id).Updates(&update).Find(&event).Error; err != nil {
-// 		log.Warn(err)
-// 		return entity.Event{}, errors.New("tidak bisa update data")
-// 	}
+func (er *EventRepo) UpdateEvent(id uint, update entity.Event) (entity.Event, error) {
+	var event entity.Event
+	if err := er.Db.Where("id = ?", id).Updates(&update).Find(&event).Error; err != nil {
+		log.Warn(err)
+		return entity.Event{}, errors.New("tidak bisa update data")
+	}
 
-// 	log.Info()
-// 	return event, nil
-// }
+	log.Info()
+	return event, nil
+}
 
-// func (er *EventRepo) DeleteEvent(id uint) (entity.Event, error) {
-// 	var event []entity.Event
-// 	res, err := er.GetEventID(id)
-// 	if err != nil {
-// 		return entity.Event{}, err
-// 	}
+func (er *EventRepo) DeleteEvent(id uint) (entity.Event, error) {
+	var event []entity.Event
+	res, err := er.GetEventID(id)
+	if err != nil {
+		return entity.Event{}, err
+	}
 
-// 	if err := er.Db.Delete(&event, "id = ?", id).Error; err != nil {
-// 		log.Warn(err)
-// 		return entity.Event{}, errors.New("tidak bisa delete data")
-// 	}
-// 	log.Info()
-// 	return res, nil
-// }
+	if err := er.Db.Delete(&event, "id = ?", id).Error; err != nil {
+		log.Warn(err)
+		return entity.Event{}, errors.New("tidak bisa delete data")
+	}
+	log.Info()
+	return res, nil
+}
