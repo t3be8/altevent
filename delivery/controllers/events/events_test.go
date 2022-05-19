@@ -1,6 +1,7 @@
 package event
 
 import (
+	"altevent/delivery/middlewares"
 	"altevent/entity"
 	"encoding/json"
 	"errors"
@@ -8,11 +9,21 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
 )
+
+var (
+	token string
+)
+
+func TestUseTokenizer(t *testing.T) {
+	t.Run("Set Token", func(t *testing.T) {
+		token, _ = middlewares.CreateToken(99, "username", "user99@test.com")
+	})
+}
 
 func TestGetEventById(t *testing.T) {
 	t.Run("Success get event data", func(t *testing.T) {
@@ -76,9 +87,14 @@ type mockEventRepo struct{}
 func (mer *mockEventRepo) Create(newEvent entity.Event) (entity.Event, error) {
 	return entity.Event{Title: "Uefa champions", Description: "final"}, nil
 }
-func (mer *mockEventRepo) GetEvent() (entity.Event, error) {
-	return entity.Event{Title: "Uefa champions", Description: "final"}, nil
+func (mer *mockEventRepo) GetEvent() ([]entity.Event, error) {
+	return []entity.Event{{Title: "Nobar EUFA Champions", Description: "Nobar final liga champions"}}, nil
 }
+
+func (mer *mockEventRepo) GetEventID(id uint) (entity.Event, error) {
+	return entity.Event{Title: "Nobar EUFA Champions", Description: "Nobar finaa liga champions"}, nil
+}
+
 func (mer *mockEventRepo) UpdateEvent(id uint, update entity.Event) (entity.Event, error) {
 	return entity.Event{Title: "Uefa champions", Description: "final"}, nil
 }
@@ -91,19 +107,15 @@ type errorMockEventRepo struct{}
 func (emur *errorMockEventRepo) Create(newEvent entity.Event) (entity.Event, error) {
 	return entity.Event{}, errors.New("error while accessing data")
 }
-func (emur *errorMockEventRepo) GetEvent() (entity.Event, error) {
-	return entity.Event{}, errors.New("error while accessing data")
-
+func (emur *errorMockEventRepo) GetEvent() ([]entity.Event, error) {
+	return []entity.Event{}, errors.New("error while accessing data")
 }
-func (emur *errorMockEventRepo) GetEventById(id uint) (entity.Event, error) {
+func (emur *errorMockEventRepo) GetEventID(id uint) (entity.Event, error) {
 	return entity.Event{}, errors.New("error while accessing data")
-
 }
 func (emur *errorMockEventRepo) UpdateEvent(id uint, update entity.Event) (entity.Event, error) {
 	return entity.Event{}, errors.New("error while accessing data")
-
 }
 func (emur *errorMockEventRepo) DeleteEvent(id uint) (entity.Event, error) {
 	return entity.Event{}, errors.New("error while accessing data")
-
 }
