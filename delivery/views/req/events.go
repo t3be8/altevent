@@ -5,8 +5,8 @@ type CreateEventRequest struct {
 	Description string `json:"description"`
 	Rules       string `json:"rules"`
 	Organizer   string `json:"organizer"`
-	DueDate     string `json:"duedate"`
-	BeginAt     string `json:"begin"`
+	DueDate     string `json:"due_date"`
+	BeginAt     string `json:"begin_at"`
 	Location    string `json:"location"`
 	Ticket      int    `json:"ticket"`
 	Links       string `json:"links"`
@@ -18,8 +18,8 @@ type UpdateEventRequest struct {
 	Description string `json:"description"`
 	Rules       string `json:"rules"`
 	Organizer   string `json:"organizer"`
-	DueDate     string `json:"duedate"`
-	BeginAt     string `json:"begin"`
+	DueDate     string `json:"due_date"`
+	BeginAt     string `json:"begin_at"`
 	Location    string `json:"location"`
 	Ticket      int    `json:"ticket"`
 	Links       string `json:"links"`
