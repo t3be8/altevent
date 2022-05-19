@@ -24,7 +24,7 @@ var (
 
 func TestUseTokenizer(t *testing.T) {
 	t.Run("Set Token", func(t *testing.T) {
-		token, _ = middlewares.CreateToken(99, "username", "user99@test.com")
+		token, _ = middlewares.CreateToken(99, "Nobar EUFA Champions", "Nobar final liga champions")
 	})
 }
 
@@ -189,7 +189,7 @@ func TestDeleteEvent(t *testing.T) {
 		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
 		res := httptest.NewRecorder()
 		context := e.NewContext(req, res)
-		context.SetPath("/events/:id")
+		context.SetPath("/event/:id")
 		context.SetParamNames("id")
 		context.SetParamValues("99")
 		eventController := New(&mockEventRepo{}, validator.New())
@@ -199,7 +199,7 @@ func TestDeleteEvent(t *testing.T) {
 		json.Unmarshal([]byte(res.Body.Bytes()), &result)
 
 		assert.Equal(t, 200, result.Code)
-		assert.Equal(t, "", result.Message)
+		assert.Equal(t, "Deleted", result.Message)
 		assert.True(t, result.Status)
 		assert.Nil(t, result.Data)
 	})
@@ -241,7 +241,7 @@ func TestUpdateEvent(t *testing.T) {
 		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
 		res := httptest.NewRecorder()
 		context := e.NewContext(req, res)
-		context.SetPath("/event/:id")
+		context.SetPath("/events/:id")
 		context.SetParamNames("id")
 		context.SetParamValues("99")
 		eventController := New(&mockEventRepo{}, validator.New())
