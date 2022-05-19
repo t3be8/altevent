@@ -155,8 +155,8 @@ func TestInsertEvent(t *testing.T) {
 		var resp Response
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
-		//assert.Equal(t, "Nobar final liga champions", resp.Data.(map[string]interface{})["description"])
-		assert.True(t, resp.Status)
+		assert.Equal(t, "Nobar final liga champions", resp.Data.(map[string]interface{})["description"])
+		//assert.True(t, resp.Status)
 	})
 	t.Run("Error at validate title", func(t *testing.T) {
 		e := echo.New()
