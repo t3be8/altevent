@@ -180,7 +180,7 @@ func (uc *UserController) Update() echo.HandlerFunc {
 		}
 
 		UpdateUser := entity.User{
-			FullName: tmpUpdate.Name,
+			FullName: tmpUpdate.Fullname,
 			Email:    tmpUpdate.Email,
 			Phone:    tmpUpdate.Phone,
 			Password: pwd,
