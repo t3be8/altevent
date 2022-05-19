@@ -139,7 +139,7 @@ func TestShow(t *testing.T) {
 		ctx := e.NewContext(request, response)
 		ctx.SetPath("/users/:id")
 		ctx.SetParamNames("id")
-		ctx.SetParamValues("9")
+		ctx.SetParamValues("99")
 
 		user := New(&errorMockUserRepo{}, validator.New())
 		middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")})(user.Show())(ctx)
@@ -151,6 +151,107 @@ func TestShow(t *testing.T) {
 		assert.False(t, resp.Status)
 		assert.Nil(t, resp.Data)
 
+	})
+}
+
+func TestShowMyEvent(t *testing.T) {
+	t.Run("Success get user data", func(t *testing.T) {
+		e := echo.New()
+		request := httptest.NewRequest(http.MethodGet, "/", nil)
+		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		request.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		response := httptest.NewRecorder()
+
+		ctx := e.NewContext(request, response)
+		ctx.SetPath("/users/:id/events")
+		ctx.SetParamNames("id")
+		ctx.SetParamValues("99")
+
+		userControl := New(&mockUserRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")})(userControl.ShowMyEvent())(ctx)
+
+		var resp Response
+		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
+		assert.Equal(t, 200, resp.Code)
+		assert.Equal(t, "Success get data by ID", resp.Message)
+		assert.True(t, resp.Status)
+		assert.NotNil(t, resp.Data)
+	})
+
+	t.Run("Error data not found", func(t *testing.T) {
+		e := echo.New()
+		request := httptest.NewRequest(http.MethodGet, "/", nil)
+		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		request.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		response := httptest.NewRecorder()
+
+		ctx := e.NewContext(request, response)
+		ctx.SetPath("/users/:id")
+		ctx.SetParamNames("id")
+		ctx.SetParamValues("9")
+
+		user := New(&errorMockUserRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")})(user.ShowMyEvent())(ctx)
+
+		var resp Response
+		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
+		assert.Equal(t, 404, resp.Code)
+		assert.Equal(t, "Data not found", resp.Message)
+		assert.False(t, resp.Status)
+		assert.Nil(t, resp.Data)
+
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	t.Run("Success Update Data", func(t *testing.T) {
+		e := echo.New()
+		requestBody, _ := json.Marshal(map[string]interface{}{
+			"email": "jdoes@test.com",
+		})
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(requestBody)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/user/:id")
+		context.SetParamNames("id")
+		context.SetParamValues("99")
+		userController := New(&mockUserRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")})(userController.Update())(context)
+
+		var result Response
+		json.Unmarshal([]byte(res.Body.Bytes()), &result)
+
+		assert.Equal(t, 200, result.Code)
+		assert.Equal(t, "Updated", result.Message)
+		assert.True(t, result.Status)
+		assert.NotNil(t, result.Data)
+	})
+}
+
+func TestDelete(t *testing.T) {
+	t.Run("Success Delete Data", func(t *testing.T) {
+		e := echo.New()
+
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/user/:id")
+		context.SetParamNames("id")
+		context.SetParamValues("3")
+		userController := New(&mockUserRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")})(userController.Delete())(context)
+
+		var result Response
+		json.Unmarshal([]byte(res.Body.Bytes()), &result)
+
+		assert.Equal(t, 200, result.Code)
+		assert.Equal(t, "Deleted", result.Message)
+		assert.True(t, result.Status)
+		assert.NotNil(t, result.Data)
 	})
 }
 
@@ -179,7 +280,6 @@ func (mur *mockUserRepo) UpdateUser(id uint, update entity.User) (entity.User, e
 func (mur *mockUserRepo) DeleteUser(id uint) (entity.User, error) {
 	return entity.User{Username: "username", Email: "user99@test.com"}, nil
 }
-
 func (mur *mockUserRepo) GetMyEvent(id uint) ([]entity.Event, error) {
 	return []entity.Event{{Title: "Nobar Final Champions League", Ticket: 125}}, nil
 }
