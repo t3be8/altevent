@@ -22,10 +22,11 @@ func main() {
 	e := echo.New()
 
 	repoUser := userRepo.New(db)
-	repoEvent := eventRepo.New(db)
+
+	repoEvents := eventRepo.New(db)
 
 	controllerUser := userController.New(repoUser, validator.New())
-	controllerEvent := eventController.New(repoEvent, validator.New())
+	controllerEvent := eventController.New(repoEvents, validator.New())
 
 	routes.RegisterPath(e, controllerUser, controllerEvent)
 	log.Fatal(e.Start(fmt.Sprintf(":%d", conf.Port)))
