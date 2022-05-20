@@ -35,7 +35,7 @@ type Event struct {
 	Links       string    `gorm:"type:varchar(255)" json:"links"`
 	Banner      string    `gorm:"type:varchar(255);not null" json:"banner"`
 	UserID      uint      `json:"user_id"`
-	Comments    []Comment `gorm:"foreignkey:UserID;references:id"`
+	Comments    []Comment `gorm:"foreignkey:EventID;references:id"`
 }
 
 type Attendee struct {
