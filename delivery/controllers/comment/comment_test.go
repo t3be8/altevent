@@ -135,6 +135,160 @@ func TestPostComment(t *testing.T) {
 	})
 }
 
+func TestSelectAllInEvent(t *testing.T) {
+	t.Run("Success Select All in event", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/events/:id/comments")
+		context.SetParamNames("id")
+		context.SetParamValues("99")
+
+		comment := New(&mockCommentRepo{}, validator.New())
+		comment.SelectAllInEvent()(context)
+
+		// type response struct {
+		// 	Code    int
+		// 	Message string
+		// 	Status  bool
+		// 	Data    []entity.Event
+		// }
+
+		var resp []entity.Comment
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
+		assert.Equal(t, resp[0].Comment, "Pertamax!")
+	})
+	t.Run("Error select all in event", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/events/:id/comments")
+		context.SetParamNames("id")
+		context.SetParamValues("2")
+
+		commentController := New(&errorMockCommentRepo{}, validator.New())
+		commentController.SelectAllInEvent()
+
+		type response struct {
+			Code    int
+			Message string
+			Status  bool
+			Data    []entity.Event
+		}
+
+		var resp response
+
+		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
+		// assert.Nil(t, resp.Data)
+		// assert.False(t, resp.Status)
+
+	})
+}
+
+func TestUpdateComment(t *testing.T) {
+	t.Run("Success Update Data", func(t *testing.T) {
+		e := echo.New()
+		requestBody, _ := json.Marshal(map[string]interface{}{
+			"Comment": "Pertalite Diamankan",
+		})
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(requestBody)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/comments/:id")
+		context.SetParamNames("id")
+		context.SetParamValues("99")
+		eventController := New(&mockCommentRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")})(eventController.Update())(context)
+
+		var result Response
+		json.Unmarshal([]byte(res.Body.Bytes()), &result)
+
+		assert.Equal(t, 200, result.Code)
+		assert.Equal(t, "Updated", result.Message)
+		assert.True(t, result.Status)
+		assert.NotNil(t, result.Data)
+	})
+
+	t.Run("Error data not found", func(t *testing.T) {
+		e := echo.New()
+		request := httptest.NewRequest(http.MethodGet, "/", nil)
+		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		request.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		response := httptest.NewRecorder()
+
+		ctx := e.NewContext(request, response)
+		ctx.SetPath("/comments/:id")
+		ctx.SetParamNames("id")
+		ctx.SetParamValues("99")
+
+		event := New(&errorMockCommentRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")})(event.Update())(ctx)
+
+		var resp Response
+		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
+		assert.Equal(t, 404, resp.Code)
+		assert.Equal(t, "Data not found", resp.Message)
+		assert.False(t, resp.Status)
+		assert.Nil(t, resp.Data)
+
+	})
+}
+
+func TestDeleteComment(t *testing.T) {
+	t.Run("Success Delete Data", func(t *testing.T) {
+		e := echo.New()
+
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/comments/:id")
+		context.SetParamNames("id")
+		context.SetParamValues("99")
+		eventController := New(&mockCommentRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")})(eventController.Delete())(context)
+
+		var result Response
+		json.Unmarshal([]byte(res.Body.Bytes()), &result)
+
+		assert.Equal(t, 200, result.Code)
+		assert.Equal(t, "Deleted", result.Message)
+		assert.True(t, result.Status)
+		assert.Nil(t, result.Data)
+	})
+
+	t.Run("Error data not found", func(t *testing.T) {
+		e := echo.New()
+		request := httptest.NewRequest(http.MethodGet, "/", nil)
+		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		request.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		response := httptest.NewRecorder()
+
+		ctx := e.NewContext(request, response)
+		ctx.SetPath("/comments/:id")
+		ctx.SetParamNames("id")
+		ctx.SetParamValues("99")
+
+		event := New(&errorMockCommentRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")})(event.Delete())(ctx)
+
+		var resp Response
+		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
+		assert.Equal(t, 404, resp.Code)
+		assert.Equal(t, "Data not found", resp.Message)
+		assert.False(t, resp.Status)
+		assert.Nil(t, resp.Data)
+
+	})
+}
+
 type Response struct {
 	Code    int
 	Message string
