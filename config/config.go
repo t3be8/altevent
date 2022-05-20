@@ -8,12 +8,15 @@ import (
 )
 
 type AppConfig struct {
-	Port     int16
-	DBPort   int16
-	Host     string
-	User     string
-	Password string
-	DBName   string
+	Port         int16
+	DBPort       int16
+	Host         string
+	User         string
+	Password     string
+	DBName       string
+	AWSKeyId     string
+	AWSAccessKey string
+	AWSRegion    string
 }
 
 func InitConfig() *AppConfig {
@@ -46,6 +49,9 @@ func GetConfig() *AppConfig {
 	res.User = os.Getenv("DBUSER")
 	res.Password = os.Getenv("DBPASSWORD")
 	res.DBName = os.Getenv("DBNAME")
+	res.AWSKeyId = os.Getenv("AWS_KEY_ID")
+	res.AWSAccessKey = os.Getenv("AWS_ACCESS_KEY")
+	res.AWSRegion = os.Getenv("AWS_REGION")
 
 	return &res
 }
