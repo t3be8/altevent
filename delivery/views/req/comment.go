@@ -1,5 +1,5 @@
 package req
 
 type ReqComment struct {
-	Comment string `json:"comment"`
+	Comment string `json:"comment" validate:"required"`
 }
