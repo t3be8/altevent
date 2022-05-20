@@ -9,4 +9,5 @@ type IEventController interface {
 	UpdateEvent() echo.HandlerFunc
 	GetEventById() echo.HandlerFunc
 	SearchEventContains() echo.HandlerFunc
+	// JoinEvent() echo.HandlerFunc
 }

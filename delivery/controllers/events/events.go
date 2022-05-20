@@ -89,15 +89,9 @@ func (ec *EventController) GetEventById() echo.HandlerFunc {
 			log.Error(err)
 			return c.JSON(http.StatusNotAcceptable, view.StatusIdConversion())
 		}
-		UserID := middlewares.ExtractTokenUserId(c)
-		if UserID != float64(convID) {
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
-		}
-
 		event, err := ec.Repo.GetEventID(uint(convID))
-
 		if err != nil {
-			log.Warn()
+			log.Warn(err)
 			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
 		}
 		response := res.EventResponse{
@@ -117,18 +111,32 @@ func (ec *EventController) GetEventById() echo.HandlerFunc {
 
 func (ec *EventController) SelectEvent() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// id := c.Param("id")
-
-		// convID, err := strconv.Atoi(id)
-		res, err := ec.Repo.SelectEvent()
-
+		result, err := ec.Repo.SelectEvent()
 		if err != nil {
 			log.Warn("masalah pada server")
 			return c.JSON(http.StatusInternalServerError, view.InternalServerError())
 		}
 
+		var arrEvent []res.EventFullResponse
+		for _, v := range result {
+			event := res.EventFullResponse{
+				ID:          v.ID,
+				Title:       v.Title,
+				Description: v.Description,
+				Rules:       v.Rules,
+				Banner:      v.Banner,
+				DueDate:     v.DueDate,
+				BeginAt:     v.BeginAt,
+				Location:    v.Location,
+				Organizer:   v.Organizer,
+				Ticket:      v.Ticket,
+				Links:       v.Links,
+				UserID:      v.UserID,
+			}
+			arrEvent = append(arrEvent, event)
+		}
 		log.Info("berhasil select Event")
-		return c.JSON(http.StatusOK, res)
+		return c.JSON(http.StatusOK, view.StatusOK("Success Get Datas", arrEvent))
 	}
 
 }
@@ -233,6 +241,7 @@ func (ec *EventController) SearchEventContains() echo.HandlerFunc {
 
 		result, err := ec.Repo.SearchEventByTitle(title)
 		if err != nil {
+			log.Warn("err", err)
 			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
 		}
 

@@ -27,6 +27,14 @@ func (er *EventRepo) InsertEvent(newEvent entity.Event) (entity.Event, error) {
 	return newEvent, nil
 }
 
+func (er *EventRepo) SearchEventByTitle(title string) ([]entity.Event, error) {
+	var events []entity.Event
+	if err := er.Db.Where("title like ?", "%"+title+"%").Find(&events).Error; err != nil {
+		return events, err
+	}
+	return events, nil
+}
+
 func (er *EventRepo) SelectEvent() ([]entity.Event, error) {
 	arrEvent := []entity.Event{}
 
@@ -45,20 +53,15 @@ func (er *EventRepo) SelectEvent() ([]entity.Event, error) {
 }
 
 func (er *EventRepo) GetEventID(id uint) (entity.Event, error) {
-	arrEvent := []entity.Event{}
+	var event entity.Event
 
-	if err := er.Db.Where("id = ?", id).Find(&arrEvent).Error; err != nil {
+	if err := er.Db.Where("id = ?", id).First(&event).Error; err != nil {
 		log.Warn(err)
 		return entity.Event{}, errors.New("tidak bisa select data")
 	}
 
-	if len(arrEvent) == 0 {
-		log.Warn("data tidak ditemukan")
-		return entity.Event{}, errors.New("data tidak ditemukan")
-	}
-
 	log.Info()
-	return arrEvent[0], nil
+	return event, nil
 }
 
 func (er *EventRepo) UpdateEvent(id uint, update entity.Event) (entity.Event, error) {
@@ -85,12 +88,4 @@ func (er *EventRepo) DeleteEvent(id uint) (entity.Event, error) {
 	}
 	log.Info()
 	return res, nil
-}
-
-func (er *EventRepo) SearchEventByTitle(title string) ([]entity.Event, error) {
-	var events []entity.Event
-	if err := er.Db.Where("title LIKE ?", "%"+title+"%").Find(&events).Error; err != nil {
-		return events, err
-	}
-	return events, nil
 }
