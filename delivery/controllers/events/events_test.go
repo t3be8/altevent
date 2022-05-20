@@ -143,8 +143,8 @@ func TestInsertEvent(t *testing.T) {
 			"links":       "bitly.com",
 		})
 		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(requestBody)))
-		req.Header.Set(echo.HeaderAuthorization, "Bearer"+token)
-		req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		res := httptest.NewRecorder()
 		context := e.NewContext(req, res)
 		context.SetPath("/events")
