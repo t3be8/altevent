@@ -81,7 +81,7 @@ func TestSelectEvent(t *testing.T) {
 	t.Run("Success Select Event", func(t *testing.T) {
 		e := echo.New()
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		// req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
 		req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		res := httptest.NewRecorder()
 		context := e.NewContext(req, res)
@@ -97,10 +97,12 @@ func TestSelectEvent(t *testing.T) {
 		// 	Data    []entity.Event
 		// }
 
-		var resp []entity.Event
+		var resp Response
 
 		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
-		assert.Equal(t, resp[0].Title, "Nobar EUFA Champions")
+		assert.Equal(t, "Success Get Datas", resp.Message)
+		assert.True(t, resp.Status)
+		assert.NotNil(t, resp.Data)
 	})
 	t.Run("Error select events", func(t *testing.T) {
 		e := echo.New()
