@@ -14,7 +14,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -82,7 +81,7 @@ func TestRegister(t *testing.T) {
 		var resp Response
 
 		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
-		log.Warn(resp)
+		// log.Warn(resp)
 		assert.False(t, resp.Status)
 		assert.Nil(t, resp.Data)
 		assert.Equal(t, 400, resp.Code)
@@ -666,7 +665,7 @@ func TestDelete(t *testing.T) {
 
 		var result Response
 		json.Unmarshal([]byte(res.Body.Bytes()), &result)
-		log.Warn(result)
+		// log.Warn(result)
 		assert.Equal(t, 401, result.Code)
 		assert.Equal(t, "Unauthorized", result.Message)
 		assert.False(t, result.Status)
@@ -691,7 +690,7 @@ func TestDelete(t *testing.T) {
 
 		var result Response
 		json.Unmarshal([]byte(res.Body.Bytes()), &result)
-		log.Warn(result)
+		// log.Warn(result)
 		assert.Equal(t, 500, result.Code)
 		assert.Equal(t, "Cannot Access Database", result.Message)
 		assert.False(t, result.Status)

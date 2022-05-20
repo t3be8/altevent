@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"altevent/delivery/controllers/comment"
 	event "altevent/delivery/controllers/events"
 	"altevent/delivery/controllers/user"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func RegisterPath(e *echo.Echo, uc user.IUserController, ec event.IEventController) {
+func RegisterPath(e *echo.Echo, uc user.IUserController, ec event.IEventController, cc comment.ICommentController) {
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	e.Use(middleware.CORS())
@@ -29,22 +30,16 @@ func RegisterPath(e *echo.Echo, uc user.IUserController, ec event.IEventControll
 	apiGroup.POST("/events", ec.InsertEvent(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
 	// apiGroup.POST("/events/:id/join", ec.InsertEvent())
 	apiGroup.GET("/events", ec.SelectEvent())
-	// apiGroup.GET("/events?title", ec.SelectEvent())
+	apiGroup.GET("/events?title=:title", ec.SearchEventContains())
 	// apiGroup.GET("/events?byme", ec.SelectEvent())
 	apiGroup.GET("/events/:id", ec.GetEventById(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
 	apiGroup.PUT("/events/:id", ec.UpdateEvent(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
 	apiGroup.DELETE("/events/:id", ec.DeleteEvent(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
 
-	// Order ticket route
-	// apiGroup.POST("/orders", oc.CreateOrder(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("RU$SI4")}))
-	// apiGroup.POST("/orders/{order_id}/cancel", oc.CancelOrder(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("RU$SI4")}))
-	// apiGroup.POST("/orders/{order_id}/payout", oc.Payment(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("RU$SI4")}))
-
-	// Event Route
-	// apiGroup.POST("/events", ec.InsertEvent())
-	// apiGroup.GET("/events", ec.SelectEvent())
-	// apiGroup.PUT("/events/{id}", ec.UpdateEvent())
-	// apiGroup.DELETE("/events/{id}", ec.DeleteEvent())
-	// apiGroup.GET("/events/{id}", ec.GetEventById())
+	// Comment Routes
+	apiGroup.POST("/events/:id/comments", cc.PostComment(), middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")}))
+	apiGroup.GET("/events/:id/comments", cc.SelectAllInEvent())
+	apiGroup.PUT("/comments/:id", cc.Update(), middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")}))
+	apiGroup.DELETE("/comments/:id", cc.Delete(), middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")}))
 
 }
