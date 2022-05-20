@@ -8,4 +8,5 @@ type IEventController interface {
 	DeleteEvent() echo.HandlerFunc
 	UpdateEvent() echo.HandlerFunc
 	GetEventById() echo.HandlerFunc
+	SearchEventContains() echo.HandlerFunc
 }

@@ -6,6 +6,7 @@ type IUserController interface {
 	Register() echo.HandlerFunc
 	Login() echo.HandlerFunc
 	Show() echo.HandlerFunc
+	ShowMyEvent() echo.HandlerFunc
 	Update() echo.HandlerFunc
 	Delete() echo.HandlerFunc
 }

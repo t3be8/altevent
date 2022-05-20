@@ -19,7 +19,7 @@ type EventRepo struct {
 	Db *gorm.DB
 }
 
-func (er *EventRepo) Create(newEvent entity.Event) (entity.Event, error) {
+func (er *EventRepo) InsertEvent(newEvent entity.Event) (entity.Event, error) {
 	if err := er.Db.Create(&newEvent).Error; err != nil {
 		return entity.Event{}, errors.New("tidak dapat insert data")
 	}
@@ -27,7 +27,7 @@ func (er *EventRepo) Create(newEvent entity.Event) (entity.Event, error) {
 	return newEvent, nil
 }
 
-func (er *EventRepo) GetEvent() ([]entity.Event, error) {
+func (er *EventRepo) SelectEvent() ([]entity.Event, error) {
 	arrEvent := []entity.Event{}
 
 	if err := er.Db.Find(&arrEvent).Error; err != nil {
@@ -85,4 +85,12 @@ func (er *EventRepo) DeleteEvent(id uint) (entity.Event, error) {
 	}
 	log.Info()
 	return res, nil
+}
+
+func (er *EventRepo) SearchEventByTitle(title string) ([]entity.Event, error) {
+	var events []entity.Event
+	if err := er.Db.Where("title LIKE ?", "%"+title+"%").Find(&events).Error; err != nil {
+		return events, err
+	}
+	return events, nil
 }

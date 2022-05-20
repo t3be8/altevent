@@ -32,6 +32,8 @@ func (ec *EventController) InsertEvent() echo.HandlerFunc {
 		var tmpEvent req.CreateEventRequest
 		var resp res.EventResponse
 
+		idUser := middlewares.ExtractTokenUserId(c)
+
 		if err := c.Bind(&tmpEvent); err != nil {
 			log.Warn("salah input")
 			return c.JSON(http.StatusBadRequest, view.StatusInvalidRequest())
@@ -53,9 +55,10 @@ func (ec *EventController) InsertEvent() echo.HandlerFunc {
 			Ticket:      tmpEvent.Ticket,
 			Links:       tmpEvent.Links,
 			Banner:      tmpEvent.Banner,
+			UserID:      uint(int(idUser)),
 		}
 
-		data, err := ec.Repo.Create(newEvent)
+		data, err := ec.Repo.InsertEvent(newEvent)
 		if err != nil {
 			log.Warn("masalah pada server")
 			return c.JSON(http.StatusInternalServerError, view.InternalServerError())
@@ -88,14 +91,14 @@ func (ec *EventController) GetEventById() echo.HandlerFunc {
 		}
 		UserID := middlewares.ExtractTokenUserId(c)
 		if UserID != float64(convID) {
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data user tidak ditemukan"))
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
 		}
 
 		event, err := ec.Repo.GetEventID(uint(convID))
 
 		if err != nil {
 			log.Warn()
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data user tidak ditemukan"))
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
 		}
 		response := res.EventResponse{
 			ID:          event.ID,
@@ -117,7 +120,7 @@ func (ec *EventController) SelectEvent() echo.HandlerFunc {
 		// id := c.Param("id")
 
 		// convID, err := strconv.Atoi(id)
-		res, err := ec.Repo.GetEvent()
+		res, err := ec.Repo.SelectEvent()
 
 		if err != nil {
 			log.Warn("masalah pada server")
@@ -221,5 +224,36 @@ func (ec *EventController) DeleteEvent() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, view.StatusDelete())
+	}
+}
+
+func (ec *EventController) SearchEventContains() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		title := c.QueryParam("title")
+
+		result, err := ec.Repo.SearchEventByTitle(title)
+		if err != nil {
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
+		}
+
+		var arrEvent []res.EventFullResponse
+		for _, v := range result {
+			event := res.EventFullResponse{
+				ID:          v.ID,
+				Title:       v.Title,
+				Description: v.Description,
+				Rules:       v.Rules,
+				Banner:      v.Banner,
+				DueDate:     v.DueDate,
+				BeginAt:     v.BeginAt,
+				Location:    v.Location,
+				Organizer:   v.Organizer,
+				Ticket:      v.Ticket,
+				Links:       v.Links,
+				UserID:      v.UserID,
+			}
+			arrEvent = append(arrEvent, event)
+		}
+		return c.JSON(http.StatusOK, view.StatusOK("Success Get Data", arrEvent))
 	}
 }

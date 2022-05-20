@@ -1,6 +1,8 @@
 package view
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func InternalServerError() map[string]interface{} {
 	return map[string]interface{}{
@@ -56,10 +58,10 @@ func StatusDelete() map[string]interface{} {
 	}
 }
 
-func StatusUnauthorized(err error) map[string]interface{} {
+func StatusUnauthorized() map[string]interface{} {
 	return map[string]interface{}{
 		"code":    http.StatusUnauthorized,
-		"message": err.Error(),
+		"message": "Unauthorized",
 		"status":  false,
 		"data":    nil,
 	}

@@ -75,6 +75,7 @@ func (uc *UserController) Register() echo.HandlerFunc {
 func (uc *UserController) Login() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var resp res.UserResponse
+		var token string
 		param := req.LoginRequest{}
 
 		if err := c.Bind(&param); err != nil {
@@ -90,7 +91,7 @@ func (uc *UserController) Login() echo.HandlerFunc {
 		match, err := uc.Repo.IsLogin(param.Email, param.Password)
 
 		if err != nil {
-			return c.JSON(http.StatusUnauthorized, view.StatusUnauthorized(err))
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found, gagal login!"))
 		}
 
 		resp = res.UserResponse{
@@ -100,12 +101,12 @@ func (uc *UserController) Login() echo.HandlerFunc {
 			Phone:    match.Phone,
 		}
 
-		res := res.LoginResponse{Data: resp}
+		res := res.LoginResponse{Data: resp, Token: token}
 
 		if res.Token == "" {
-			token, _ := middlewares.CreateToken(float64(match.ID), match.Username, match.Email)
+			token, _ = middlewares.CreateToken(float64(match.ID), match.Username, match.Email)
 			res.Token = token
-			return c.JSON(http.StatusOK, view.StatusOK("Berhasil login!", resp))
+			return c.JSON(http.StatusOK, view.StatusOK("Berhasil login!", res))
 		}
 
 		// c.SetCookie(&http.Cookie{
@@ -114,7 +115,7 @@ func (uc *UserController) Login() echo.HandlerFunc {
 		// 	Expires: time.Now().Add(time.Hour * 1),
 		// })
 
-		return c.JSON(http.StatusOK, view.StatusOK("Berhasil login!", resp))
+		return c.JSON(http.StatusOK, view.StatusOK("Berhasil login!", res))
 	}
 }
 
@@ -147,6 +148,50 @@ func (uc *UserController) Show() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, view.StatusGetDatIdOK(response))
 	}
 
+}
+
+func (uc *UserController) ShowMyEvent() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.Param("id")
+
+		convID, err := strconv.Atoi(id)
+		if err != nil {
+			log.Error(err)
+			return c.JSON(http.StatusNotAcceptable, view.StatusIdConversion())
+		}
+
+		UserID := middlewares.ExtractTokenUserId(c)
+		if UserID != float64(convID) {
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
+		}
+
+		result, err := uc.Repo.GetMyEvent(uint(UserID))
+		if err != nil {
+			log.Warn()
+			return c.JSON(http.StatusNotFound, view.StatusNotFound("Data not found"))
+		}
+
+		var arrEvent []res.EventFullResponse
+		for _, v := range result {
+			event := res.EventFullResponse{
+				ID:          v.ID,
+				Title:       v.Title,
+				Description: v.Description,
+				Rules:       v.Rules,
+				Banner:      v.Banner,
+				DueDate:     v.DueDate,
+				BeginAt:     v.BeginAt,
+				Location:    v.Location,
+				Organizer:   v.Organizer,
+				Ticket:      v.Ticket,
+				Links:       v.Links,
+				UserID:      v.UserID,
+			}
+			arrEvent = append(arrEvent, event)
+		}
+
+		return c.JSON(http.StatusOK, view.StatusGetDatIdOK(arrEvent))
+	}
 }
 
 func (uc *UserController) Update() echo.HandlerFunc {
@@ -222,15 +267,10 @@ func (uc *UserController) Delete() echo.HandlerFunc {
 		UserID := middlewares.ExtractTokenUserId(c)
 
 		if UserID != float64(convID) {
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data tidak ditemukan"))
+			return c.JSON(http.StatusUnauthorized, view.StatusUnauthorized())
 		}
 
-		found, err := uc.Repo.GetUserID(uint(UserID))
-		if err != nil {
-			return c.JSON(http.StatusNotFound, view.StatusNotFound("data tidak ditemukan"))
-		}
-
-		_, error := uc.Repo.DeleteUser(found.ID)
+		_, error := uc.Repo.DeleteUser(uint(convID))
 
 		if error != nil {
 			return c.JSON(http.StatusInternalServerError, view.InternalServerError())
