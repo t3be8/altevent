@@ -239,6 +239,36 @@ func TestUpdateComment(t *testing.T) {
 		assert.Nil(t, resp.Data)
 
 	})
+
+	t.Run("Error Bind Data", func(t *testing.T) {
+		e := echo.New()
+		// rb, _ := json.Marshal(map[string]interface{}{
+		// 	"id":       99,
+		// 	"fullname": "John Doel",
+		// 	"email":    "jdoes@test.com",
+		// })
+
+		rb := "wrongs binding"
+		req := httptest.NewRequest(http.MethodPut, "/", strings.NewReader(string(rb)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/comments/:id")
+		context.SetParamNames("id")
+		context.SetParamValues("99")
+
+		userController := New(&errorMockCommentRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")})(userController.Update())(context)
+
+		var result Response
+		json.Unmarshal([]byte(res.Body.Bytes()), &result)
+		// log.Warn(result)
+		assert.Equal(t, 415, result.Code)
+		assert.Equal(t, "Cannot Bind Data", result.Message)
+		assert.False(t, result.Status)
+		assert.Nil(t, result.Data)
+	})
 }
 
 func TestDeleteComment(t *testing.T) {
@@ -287,6 +317,36 @@ func TestDeleteComment(t *testing.T) {
 		assert.False(t, resp.Status)
 		assert.Nil(t, resp.Data)
 
+	})
+
+	t.Run("Error Bind Data", func(t *testing.T) {
+		e := echo.New()
+		// rb, _ := json.Marshal(map[string]interface{}{
+		// 	"id":       99,
+		// 	"fullname": "John Doel",
+		// 	"email":    "jdoes@test.com",
+		// })
+
+		rb := "wrongs binding"
+		req := httptest.NewRequest(http.MethodPut, "/", strings.NewReader(string(rb)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		res := httptest.NewRecorder()
+		context := e.NewContext(req, res)
+		context.SetPath("/comments/:id")
+		context.SetParamNames("id")
+		context.SetParamValues("99")
+
+		userController := New(&errorMockCommentRepo{}, validator.New())
+		middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")})(userController.Delete())(context)
+
+		var result Response
+		json.Unmarshal([]byte(res.Body.Bytes()), &result)
+		// log.Warn(result)
+		assert.Equal(t, 415, result.Code)
+		assert.Equal(t, "Cannot Bind Data", result.Message)
+		assert.False(t, result.Status)
+		assert.Nil(t, result.Data)
 	})
 }
 
