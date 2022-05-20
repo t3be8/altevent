@@ -238,7 +238,7 @@ paths:
   #-------------------------------
   # Event Section
   #-------------------------------
-  /events?title={title}:
+  /event?title={title}:
     parameters:
       - name: title
         in: query

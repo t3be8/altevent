@@ -28,13 +28,14 @@ func RegisterPath(e *echo.Echo, uc user.IUserController, ec event.IEventControll
 
 	// Events route
 	apiGroup.POST("/events", ec.InsertEvent(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
-	// apiGroup.POST("/events/:id/join", ec.InsertEvent())
+	apiGroup.GET("/event", ec.SearchEventContains())
 	apiGroup.GET("/events", ec.SelectEvent())
-	apiGroup.GET("/events?title=:title", ec.SearchEventContains())
-	// apiGroup.GET("/events?byme", ec.SelectEvent())
-	apiGroup.GET("/events/:id", ec.GetEventById(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
+	apiGroup.GET("/events/:id", ec.GetEventById())
 	apiGroup.PUT("/events/:id", ec.UpdateEvent(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
 	apiGroup.DELETE("/events/:id", ec.DeleteEvent(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
+	// apiGroup.POST("/events/:id/join", ec.InsertEvent())
+	// apiGroup.GET("/events?byme", ec.SelectEvent())
+	// apiGroup.GET("/events/:id", ec.GetEventById(), middleware.JWTWithConfig(middleware.JWTConfig{SigningKey: []byte("ALTEVEN")}))
 
 	// Comment Routes
 	apiGroup.POST("/events/:id/comments", cc.PostComment(), middleware.JWTWithConfig(middleware.JWTConfig{SigningMethod: "HS256", SigningKey: []byte("ALTEVEN")}))
