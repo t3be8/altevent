@@ -136,55 +136,56 @@ func TestPostComment(t *testing.T) {
 }
 
 func TestSelectAllInEvent(t *testing.T) {
-	t.Run("Success Select All in event", func(t *testing.T) {
+	t.Run("Success get all in event", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		res := httptest.NewRecorder()
-		context := e.NewContext(req, res)
-		context.SetPath("/events/:id/comments")
-		context.SetParamNames("id")
-		context.SetParamValues("99")
+		request := httptest.NewRequest(http.MethodGet, "/", nil)
+		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		//request.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		response := httptest.NewRecorder()
+
+		ctx := e.NewContext(request, response)
+		ctx.SetPath("/events/:id/comments")
+		ctx.SetParamNames("id")
+		ctx.SetParamValues("99")
 
 		comment := New(&mockCommentRepo{}, validator.New())
-		comment.SelectAllInEvent()(context)
+		comment.SelectAllInEvent()(ctx)
 
-		// type response struct {
-		// 	Code    int
-		// 	Message string
-		// 	Status  bool
-		// 	Data    []entity.Event
-		// }
-
-		var resp []entity.Comment
-
-		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
-		assert.Equal(t, resp[0].Comment, "Pertamax!")
-	})
-	t.Run("Error select all in event", func(t *testing.T) {
-		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		res := httptest.NewRecorder()
-		context := e.NewContext(req, res)
-		context.SetPath("/events/:id/comments")
-		context.SetParamNames("id")
-		context.SetParamValues("2")
-
-		commentController := New(&errorMockCommentRepo{}, validator.New())
-		commentController.SelectAllInEvent()
-
-		type response struct {
+		type Response struct {
 			Code    int
 			Message string
 			Status  bool
-			Data    []entity.Event
+			Data    interface{}
 		}
 
-		var resp response
+		var resp Response
+		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
+		assert.Equal(t, 200, resp.Code)
+		assert.Equal(t, "Success Get Data", resp.Message)
+		assert.True(t, resp.Status)
+		assert.NotNil(t, resp.Data)
+	})
+	t.Run("Error DB data not found", func(t *testing.T) {
+		e := echo.New()
+		request := httptest.NewRequest(http.MethodGet, "/", nil)
+		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		//request.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+		response := httptest.NewRecorder()
 
-		json.Unmarshal([]byte(res.Body.Bytes()), &resp)
-		// assert.Nil(t, resp.Data)
-		// assert.False(t, resp.Status)
+		ctx := e.NewContext(request, response)
+		ctx.SetPath("/users/:id")
+		ctx.SetParamNames("id")
+		ctx.SetParamValues("99")
+
+		comment := New(&errorMockCommentRepo{}, validator.New())
+		comment.SelectAllInEvent()(ctx)
+
+		var resp Response
+		json.Unmarshal([]byte(response.Body.Bytes()), &resp)
+		assert.Equal(t, 404, resp.Code)
+		assert.Equal(t, "Data not found", resp.Message)
+		assert.False(t, resp.Status)
+		assert.Nil(t, resp.Data)
 
 	})
 }
